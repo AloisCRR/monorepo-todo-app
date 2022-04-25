@@ -18,7 +18,8 @@ import { ToDoModule } from './to-do/to-do.module';
           process.cwd(),
           'libs/todo-api-interfaces/src/lib/todo-api-interfaces.ts'
         ),
-        emitTypenameField: true
+        emitTypenameField: true,
+        outputAs: 'class'
       }
     })
   ]

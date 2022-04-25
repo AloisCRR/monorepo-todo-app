@@ -12,8 +12,6 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
-  app.setGlobalPrefix('api');
-
   void app.register(AltairFastify, {
     path: '/altair',
     baseURL: '/altair/',
