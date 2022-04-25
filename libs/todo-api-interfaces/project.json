@@ -1,0 +1,15 @@
+{
+  "root": "libs/todo-api-interfaces",
+  "sourceRoot": "libs/todo-api-interfaces/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/todo-api-interfaces/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}
