@@ -3,13 +3,12 @@ import { AppShell, MantineProvider } from '@mantine/core';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import ToDoAppHeader from '../components/header/header';
-import './styles.css';
 
 function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>ToDo App</title>
+        <title>Monorepo ToDo App</title>
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width"

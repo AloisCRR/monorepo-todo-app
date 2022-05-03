@@ -23,7 +23,7 @@ export default function ToDoAppHeader() {
     <Header p="md" height="fit-content">
       <Container className={classes.container}>
         <Title align="center" order={3}>
-          ToDo App
+          Monorepo ToDo App
         </Title>
         <ActionIcon>
           <BrandGithub size={18} />
