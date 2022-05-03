@@ -4,6 +4,19 @@ type ToDo {
   description: String!
 }
 
+input AuthenticatedUser {
+  jwt: String!
+}
+
+input AddNewToDo {
+  title: String!
+  description: String!
+}
+
 type Query {
-  todos: [ToDo]
+  getAllTodosFromUser(data: AuthenticatedUser!): [ToDo]!
+}
+
+type Mutation {
+  addNewToDo(data: AddNewToDo, user: AuthenticatedUser): ToDo!
 }

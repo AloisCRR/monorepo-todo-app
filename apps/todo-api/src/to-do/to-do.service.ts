@@ -1,13 +1,39 @@
-import type { ToDo } from '@monorepo-todo-app/todo-api-interfaces';
+import type {
+  AuthenticatedUser,
+  ToDo
+} from '@monorepo-todo-app/todo-api-interfaces';
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import type { Prisma } from '@prisma/client';
+import PrismaService from '../prisma.service';
 
 @Injectable()
 export default class ToDoService {
-  private readonly exampleTodos: ToDo[] = [
-    { description: 'Test ToDo API', id: 'some-uuid', title: 'Hello!!' }
-  ];
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService
+  ) {}
 
-  getAllTodos(): ToDo[] {
-    return this.exampleTodos;
+  async getAllTodosFromUser(data: AuthenticatedUser): Promise<ToDo[]> {
+    const { id } = this.jwtService.verify<{ id: string }>(data.jwt);
+
+    const result = await this.prisma.toDo.findMany({ where: { userId: id } });
+
+    return result;
+  }
+
+  async addNewTodo(
+    data: Prisma.ToDoCreateWithoutUserInput,
+    user: AuthenticatedUser
+  ): Promise<ToDo> {
+    const { id } = this.jwtService.verify<{ id: string }>(user.jwt);
+
+    return await this.prisma.toDo.create({
+      data: {
+        description: data.description,
+        title: data.title,
+        user: { connect: { id } }
+      }
+    });
   }
 }
