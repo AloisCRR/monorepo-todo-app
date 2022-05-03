@@ -2,6 +2,7 @@
   "extends": ["airbnb", "airbnb-typescript"],
   "rules": {
     "object-curly-newline": ["off"],
-    "react/jsx-wrap-multilines": ["error", { "prop": "ignore" }]
+    "react/jsx-wrap-multilines": ["error", { "prop": "ignore" }],
+    "react/jsx-one-expression-per-line": ["off"]
   }
 }
