@@ -1,5 +1,4 @@
 {
-  "root": "apps/todo",
   "sourceRoot": "apps/todo",
   "projectType": "application",
   "targets": {

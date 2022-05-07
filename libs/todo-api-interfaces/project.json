@@ -1,5 +1,4 @@
 {
-  "root": "libs/todo-api-interfaces",
   "sourceRoot": "libs/todo-api-interfaces/src",
   "projectType": "library",
   "targets": {
