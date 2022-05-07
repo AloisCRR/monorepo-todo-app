@@ -7,8 +7,8 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: monorepo_todo_app
-      POSTGRES_PASSWORD: development
+      - POSTGRES_USER=monorepo_todo_app
+      - POSTGRES_PASSWORD=development
     volumes:
       - local_pgdata:/var/lib/postgresql/data
   pgadmin:
@@ -18,8 +18,8 @@ services:
     ports:
       - '5050:80'
     environment:
-      PGADMIN_DEFAULT_EMAIL: development@monorepo.com
-      PGADMIN_DEFAULT_PASSWORD: development
+      - PGADMIN_DEFAULT_EMAIL=development@monorepo.com
+      - PGADMIN_DEFAULT_PASSWORD=development
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
