@@ -1,0 +1,7 @@
+mutation createNewTodo($data: AddNewToDo!, $user: AuthenticatedUser!) {
+  addNewToDo(data: $data, user: $user) {
+    id
+    title
+    description
+  }
+}

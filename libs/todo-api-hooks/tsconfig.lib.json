@@ -3,9 +3,8 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": [],
-    "lib": ["ESNext"],
-    "strictPropertyInitialization": false
+    "noUnusedLocals": false,
+    "types": []
   },
   "include": ["**/*.ts"],
   "exclude": ["jest.config.ts", "**/*.spec.ts"]

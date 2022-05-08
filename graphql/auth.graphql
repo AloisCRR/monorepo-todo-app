@@ -1,0 +1,12 @@
+input UserRegister {
+  email: String!
+  password: String!
+}
+
+type AuthResponse {
+  jwt: String!
+}
+
+type Mutation {
+  register(data: UserRegister!): AuthResponse!
+}

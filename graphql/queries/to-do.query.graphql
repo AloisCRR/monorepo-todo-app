@@ -1,0 +1,7 @@
+query GetAllToDo($data: AuthenticatedUser!) {
+  getAllTodosFromUser(data: $data) {
+    id
+    title
+    description
+  }
+}

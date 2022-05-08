@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@monorepo-todo-app/todo-api-hooks": ["libs/todo-api-hooks/src/index.ts"],
       "@monorepo-todo-app/todo-api-interfaces": [
         "libs/todo-api-interfaces/src/index.ts"
       ]

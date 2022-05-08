@@ -1,0 +1,24 @@
+overwrite: true
+schema: 'http://localhost:3333/graphql'
+documents: 'graphql/**/*.graphql'
+generates:
+  libs/todo-api-hooks/src/lib/todo-api-hooks.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-query'
+    config:
+      noExport: true
+      useTypeImports: true
+      fetcher: graphql-request
+  libs/todo-api-interfaces/src/lib/todo-api-interfaces.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-resolvers'
+      - 'typescript-document-nodes'
+    config:
+      useTypeImports: true
+  ./graphql.schema.json:
+    plugins:
+      - 'introspection'

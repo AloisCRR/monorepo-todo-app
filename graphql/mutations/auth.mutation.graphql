@@ -1,0 +1,5 @@
+mutation Register($data: UserRegister!) {
+  register(data: $data) {
+    jwt
+  }
+}
