@@ -2,9 +2,47 @@
 import { AppShell, MantineProvider } from '@mantine/core';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ToDoAppHeader from '../components/header/header';
 
-function App({ Component, pageProps }: AppProps) {
+type AppProperties<P = unknown> = {
+  pageProps: P;
+} & Omit<AppProps<P>, 'pageProps'>;
+
+function App({
+  Component,
+  pageProps
+}: AppProperties<{ dehydratedState: unknown }>) {
+  const router = useRouter();
+
+  const [queryClient] = useState(() => new QueryClient());
+
+  useEffect(() => {
+    const publicRoutes = ['/authentication'];
+
+    const token = localStorage.getItem('jwt-monorepo-app');
+
+    if (!publicRoutes.includes(router.pathname) && !token) {
+      router
+        .replace({
+          pathname: '/authentication',
+          query: { returnUrl: router.pathname }
+        })
+        .then(() => {
+          toast.error('Please login/register to access previous page');
+        })
+        .catch(() => {
+          toast.error('Change route error');
+        });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <Head>
@@ -22,7 +60,12 @@ function App({ Component, pageProps }: AppProps) {
         }}
       >
         <AppShell header={<ToDoAppHeader />}>
-          <Component {...pageProps} />
+          <QueryClientProvider client={queryClient}>
+            <Hydrate state={pageProps.dehydratedState}>
+              <Component {...pageProps} />
+            </Hydrate>
+          </QueryClientProvider>
+          <ToastContainer />
         </AppShell>
       </MantineProvider>
     </>

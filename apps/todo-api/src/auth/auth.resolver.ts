@@ -1,4 +1,4 @@
-import { UserRegister } from '@monorepo-todo-app/todo-api-interfaces';
+import type { UserRegister } from '@monorepo-todo-app/todo-api-interfaces';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 

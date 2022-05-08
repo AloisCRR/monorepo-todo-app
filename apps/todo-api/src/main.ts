@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
-  NestFastifyApplication
+  type NestFastifyApplication
 } from '@nestjs/platform-fastify';
 import AltairFastify from 'altair-fastify-plugin';
 import { AppModule } from './app.module';
@@ -12,6 +12,7 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
+  // @ts-expect-error Incompatible interfaces between @nestjs/platform-fastify and fastify
   void app.register(AltairFastify, {
     path: '/altair',
     baseURL: '/altair/',
