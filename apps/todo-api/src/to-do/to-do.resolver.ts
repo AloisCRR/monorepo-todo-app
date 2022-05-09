@@ -2,10 +2,11 @@ import type {
   AuthenticatedUser,
   DeleteTodo,
   NewToDo,
-  ToDo,
-  UpdateTodo
+  UpdateTodo,
+  UpdateTodoState
 } from '@monorepo-todo-app/todo-api-interfaces';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import type { ToDo } from '@prisma/client';
 import ToDoService from './to-do.service';
 
 @Resolver('ToDo')
@@ -41,5 +42,13 @@ export class ToDoResolver {
     @Args('user') user: AuthenticatedUser
   ) {
     return await this.toDoService.updateToDo(data, user);
+  }
+
+  @Mutation()
+  async updateToDoState(
+    @Args('data') data: UpdateTodoState,
+    @Args('user') user: AuthenticatedUser
+  ) {
+    return await this.toDoService.updateTodoState(data, user);
   }
 }

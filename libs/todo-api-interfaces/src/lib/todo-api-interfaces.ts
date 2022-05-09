@@ -50,6 +50,7 @@ export type Mutation = {
   login: AuthResponse;
   register: AuthResponse;
   updateToDo: DeleteAndUpdateResponse;
+  updateToDoState: DeleteAndUpdateResponse;
 };
 
 export type MutationAddNewToDoArgs = {
@@ -75,6 +76,11 @@ export type MutationUpdateToDoArgs = {
   user: AuthenticatedUser;
 };
 
+export type MutationUpdateToDoStateArgs = {
+  data: UpdateTodoState;
+  user: AuthenticatedUser;
+};
+
 export type NewToDo = {
   description: Scalars['String'];
   title: Scalars['String'];
@@ -93,13 +99,25 @@ export type ToDo = {
   __typename?: 'ToDo';
   description: Scalars['String'];
   id: Scalars['String'];
+  state: ToDoState;
   title: Scalars['String'];
 };
+
+export enum ToDoState {
+  Done = 'DONE',
+  InProgress = 'IN_PROGRESS',
+  Todo = 'TODO'
+}
 
 export type UpdateTodo = {
   description: Scalars['String'];
   id: Scalars['String'];
   title: Scalars['String'];
+};
+
+export type UpdateTodoState = {
+  id: Scalars['String'];
+  state: ToDoState;
 };
 
 export type UserRegister = {
@@ -145,6 +163,7 @@ export type CreateNewTodoMutation = {
     id: string;
     title: string;
     description: string;
+    state: ToDoState;
   } | null;
 };
 
@@ -156,6 +175,20 @@ export type UpdateToDoMutationVariables = Exact<{
 export type UpdateToDoMutation = {
   __typename?: 'Mutation';
   updateToDo: {
+    __typename?: 'DeleteAndUpdateResponse';
+    message?: string | null;
+    error?: string | null;
+  };
+};
+
+export type UpdateToDoStateMutationVariables = Exact<{
+  data: UpdateTodoState;
+  user: AuthenticatedUser;
+}>;
+
+export type UpdateToDoStateMutation = {
+  __typename?: 'Mutation';
+  updateToDoState: {
     __typename?: 'DeleteAndUpdateResponse';
     message?: string | null;
     error?: string | null;
@@ -187,6 +220,7 @@ export type GetAllToDoQuery = {
     id: string;
     title: string;
     description: string;
+    state: ToDoState;
   }>;
 };
 
@@ -307,7 +341,9 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   ToDo: ResolverTypeWrapper<ToDo>;
+  ToDoState: ToDoState;
   UpdateTodo: UpdateTodo;
+  UpdateTodoState: UpdateTodoState;
   UserRegister: UserRegister;
 };
 
@@ -324,6 +360,7 @@ export type ResolversParentTypes = {
   String: Scalars['String'];
   ToDo: ToDo;
   UpdateTodo: UpdateTodo;
+  UpdateTodoState: UpdateTodoState;
   UserRegister: UserRegister;
 };
 
@@ -379,6 +416,12 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationUpdateToDoArgs, 'data' | 'user'>
   >;
+  updateToDoState?: Resolver<
+    ResolversTypes['DeleteAndUpdateResponse'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationUpdateToDoStateArgs, 'data' | 'user'>
+  >;
 };
 
 export type QueryResolvers<
@@ -399,6 +442,7 @@ export type ToDoResolvers<
 > = {
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  state?: Resolver<ResolversTypes['ToDoState'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -433,12 +477,21 @@ export const CreateNewTodo = gql`
       id
       title
       description
+      state
     }
   }
 `;
 export const UpdateToDo = gql`
   mutation updateToDo($data: UpdateTodo!, $user: AuthenticatedUser!) {
     updateToDo(data: $data, user: $user) {
+      message
+      error
+    }
+  }
+`;
+export const UpdateToDoState = gql`
+  mutation updateToDoState($data: UpdateTodoState!, $user: AuthenticatedUser!) {
+    updateToDoState(data: $data, user: $user) {
       message
       error
     }
@@ -458,6 +511,7 @@ export const GetAllToDo = gql`
       id
       title
       description
+      state
     }
   }
 `;

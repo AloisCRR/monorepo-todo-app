@@ -1,7 +1,14 @@
+enum ToDoState {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
 type ToDo {
   id: String!
   title: String!
   description: String!
+  state: ToDoState!
 }
 
 type DeleteAndUpdateResponse {
@@ -26,4 +33,9 @@ input UpdateTodo {
   id: String!
   title: String!
   description: String!
+}
+
+input UpdateTodoState {
+  id: String!
+  state: ToDoState!
 }

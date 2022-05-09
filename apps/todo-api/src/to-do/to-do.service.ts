@@ -2,12 +2,12 @@ import type {
   AuthenticatedUser,
   DeleteAndUpdateResponse,
   DeleteTodo,
-  ToDo,
-  UpdateTodo
+  UpdateTodo,
+  UpdateTodoState
 } from '@monorepo-todo-app/todo-api-interfaces';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, ToDo } from '@prisma/client';
 import PrismaService from '../prisma.service';
 
 @Injectable()
@@ -88,6 +88,34 @@ export default class ToDoService {
 
   async updateToDo(
     data: UpdateTodo,
+    user: AuthenticatedUser
+  ): Promise<DeleteAndUpdateResponse> {
+    let userId: string;
+
+    try {
+      const { id } = this.jwtService.verify<{ id: string }>(user.jwt);
+
+      userId = id;
+    } catch (error) {
+      return {
+        error: (error as Error).message
+      };
+    }
+
+    await this.prisma.toDo.update({
+      data,
+      where: {
+        id_userId: { userId, id: data.id }
+      }
+    });
+
+    return {
+      message: 'Success!'
+    };
+  }
+
+  async updateTodoState(
+    data: UpdateTodoState,
     user: AuthenticatedUser
   ): Promise<DeleteAndUpdateResponse> {
     let userId: string;

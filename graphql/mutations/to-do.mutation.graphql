@@ -8,6 +8,10 @@ type Mutation {
     data: UpdateTodo!
     user: AuthenticatedUser!
   ): DeleteAndUpdateResponse!
+  updateToDoState(
+    data: UpdateTodoState!
+    user: AuthenticatedUser!
+  ): DeleteAndUpdateResponse!
 }
 
 mutation createNewTodo($data: NewToDo!, $user: AuthenticatedUser!) {
@@ -15,11 +19,19 @@ mutation createNewTodo($data: NewToDo!, $user: AuthenticatedUser!) {
     id
     title
     description
+    state
   }
 }
 
 mutation updateToDo($data: UpdateTodo!, $user: AuthenticatedUser!) {
   updateToDo(data: $data, user: $user) {
+    message
+    error
+  }
+}
+
+mutation updateToDoState($data: UpdateTodoState!, $user: AuthenticatedUser!) {
+  updateToDoState(data: $data, user: $user) {
     message
     error
   }

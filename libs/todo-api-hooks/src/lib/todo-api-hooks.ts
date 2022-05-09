@@ -61,6 +61,7 @@ type Mutation = {
   login: AuthResponse;
   register: AuthResponse;
   updateToDo: DeleteAndUpdateResponse;
+  updateToDoState: DeleteAndUpdateResponse;
 };
 
 type MutationAddNewToDoArgs = {
@@ -86,6 +87,11 @@ type MutationUpdateToDoArgs = {
   user: AuthenticatedUser;
 };
 
+type MutationUpdateToDoStateArgs = {
+  data: UpdateTodoState;
+  user: AuthenticatedUser;
+};
+
 type NewToDo = {
   description: Scalars['String'];
   title: Scalars['String'];
@@ -104,13 +110,25 @@ type ToDo = {
   __typename?: 'ToDo';
   description: Scalars['String'];
   id: Scalars['String'];
+  state: ToDoState;
   title: Scalars['String'];
 };
+
+enum ToDoState {
+  Done = 'DONE',
+  InProgress = 'IN_PROGRESS',
+  Todo = 'TODO'
+}
 
 type UpdateTodo = {
   description: Scalars['String'];
   id: Scalars['String'];
   title: Scalars['String'];
+};
+
+type UpdateTodoState = {
+  id: Scalars['String'];
+  state: ToDoState;
 };
 
 type UserRegister = {
@@ -156,6 +174,7 @@ type CreateNewTodoMutation = {
     id: string;
     title: string;
     description: string;
+    state: ToDoState;
   } | null;
 };
 
@@ -167,6 +186,20 @@ type UpdateToDoMutationVariables = Exact<{
 type UpdateToDoMutation = {
   __typename?: 'Mutation';
   updateToDo: {
+    __typename?: 'DeleteAndUpdateResponse';
+    message?: string | null;
+    error?: string | null;
+  };
+};
+
+type UpdateToDoStateMutationVariables = Exact<{
+  data: UpdateTodoState;
+  user: AuthenticatedUser;
+}>;
+
+type UpdateToDoStateMutation = {
+  __typename?: 'Mutation';
+  updateToDoState: {
     __typename?: 'DeleteAndUpdateResponse';
     message?: string | null;
     error?: string | null;
@@ -198,6 +231,7 @@ type GetAllToDoQuery = {
     id: string;
     title: string;
     description: string;
+    state: ToDoState;
   }>;
 };
 
@@ -265,6 +299,7 @@ const CreateNewTodoDocument = `
     id
     title
     description
+    state
   }
 }
     `;
@@ -328,6 +363,43 @@ export const useUpdateToDoMutation = <TError = unknown, TContext = unknown>(
       )(),
     options
   );
+const UpdateToDoStateDocument = `
+    mutation updateToDoState($data: UpdateTodoState!, $user: AuthenticatedUser!) {
+  updateToDoState(data: $data, user: $user) {
+    message
+    error
+  }
+}
+    `;
+export const useUpdateToDoStateMutation = <
+  TError = unknown,
+  TContext = unknown
+>(
+  client: GraphQLClient,
+  options?: UseMutationOptions<
+    UpdateToDoStateMutation,
+    TError,
+    UpdateToDoStateMutationVariables,
+    TContext
+  >,
+  headers?: RequestInit['headers']
+) =>
+  useMutation<
+    UpdateToDoStateMutation,
+    TError,
+    UpdateToDoStateMutationVariables,
+    TContext
+  >(
+    ['updateToDoState'],
+    (variables?: UpdateToDoStateMutationVariables) =>
+      fetcher<UpdateToDoStateMutation, UpdateToDoStateMutationVariables>(
+        client,
+        UpdateToDoStateDocument,
+        variables,
+        headers
+      )(),
+    options
+  );
 const DeleteToDoDocument = `
     mutation deleteToDo($data: DeleteTodo!, $user: AuthenticatedUser!) {
   deleteToDo(data: $data, user: $user) {
@@ -368,6 +440,7 @@ const GetAllToDoDocument = `
     id
     title
     description
+    state
   }
 }
     `;

@@ -33,5 +33,5 @@ model ToDo {
 enum ToDoState {
   TODO
   IN_PROGRESS
-  MADE
+  DONE
 }

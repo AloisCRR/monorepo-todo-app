@@ -1,6 +1,7 @@
 {
   "extends": ["airbnb", "airbnb-typescript"],
   "rules": {
+    "no-console": "error",
     "object-curly-newline": ["off"],
     "react/jsx-wrap-multilines": ["error", { "prop": "ignore" }],
     "react/jsx-one-expression-per-line": ["off"],
@@ -9,6 +10,7 @@
       {
         "checksVoidReturn": false
       }
-    ]
+    ],
+    "react/require-default-props": ["off"]
   }
 }

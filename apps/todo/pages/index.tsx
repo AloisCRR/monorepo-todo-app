@@ -18,10 +18,14 @@ import {
   useCreateNewTodoMutation,
   useDeleteToDoMutation,
   useGetAllToDoQuery,
-  useUpdateToDoMutation
+  useUpdateToDoMutation,
+  useUpdateToDoStateMutation
 } from '@monorepo-todo-app/todo-api-hooks';
-import type { GetAllToDoQuery } from '@monorepo-todo-app/todo-api-interfaces';
-import { useEffect, useState } from 'react';
+import {
+  GetAllToDoQuery,
+  ToDoState
+} from '@monorepo-todo-app/todo-api-interfaces';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from 'react-query';
 import { toast } from 'react-toastify';
@@ -55,8 +59,10 @@ type ToDoForm = {
 };
 
 const formValidation: SchemaOf<ToDoForm> = object({
-  description: string().required(),
-  title: string().required()
+  description: string()
+    .max(255, 'Maximum amount of characters is 255')
+    .required(),
+  title: string().max(255, 'Maximum amount of characters is 255').required()
 });
 
 export function Index() {
@@ -69,16 +75,21 @@ export function Index() {
     'Edit'
   ]);
 
-  const [todoId, setTodoId] = useState('');
+  const todoId = useRef('');
+  const todoState = useRef<ToDoState>(ToDoState.Todo);
 
   const [token, setToken] = useState('');
 
   const { classes } = useStyles();
 
-  const { handleSubmit, register, setValue, reset } = useForm<ToDoForm>({
-    resolver: yupResolver(formValidation),
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    reset,
+    formState: { errors }
+  } = useForm<ToDoForm>({
+    resolver: yupResolver(formValidation)
   });
 
   useEffect(() => {
@@ -90,7 +101,11 @@ export function Index() {
     {
       data: { jwt: token }
     },
-    { enabled: !!token, refetchOnMount: false, refetchOnWindowFocus: false }
+    {
+      enabled: !!token,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false
+    }
   );
 
   const { mutate: createNewTodo, isLoading: loadingNewTodo } =
@@ -101,6 +116,9 @@ export function Index() {
 
   const { mutate: updateTodo, isLoading: loadingTodoUpdate } =
     useUpdateToDoMutation(graphQlClient);
+
+  const { mutate: updateTodoState, isLoading: loadingTodoStateUpdate } =
+    useUpdateToDoStateMutation(graphQlClient);
 
   const queryClient = useQueryClient();
 
@@ -144,6 +162,9 @@ export function Index() {
 
                       toast.success('To Do successfully created!');
                     }
+                  },
+                  onError: () => {
+                    toast.error('There was an error trying to create a To Do!');
                   }
                 }
               );
@@ -155,7 +176,7 @@ export function Index() {
               {
                 data: {
                   ...data,
-                  id: todoId
+                  id: todoId.current
                 },
                 user: { jwt: localStorage.getItem('jwt-monorepo-app') || '' }
               },
@@ -172,10 +193,11 @@ export function Index() {
                       {
                         getAllTodosFromUser:
                           query?.getAllTodosFromUser.map((todo) => {
-                            if (todo.id === todoId) {
+                            if (todo.id === todoId.current) {
                               return {
                                 ...data,
-                                id: todoId
+                                id: todoId.current,
+                                state: todoState.current
                               };
                             }
 
@@ -188,6 +210,9 @@ export function Index() {
 
                     toast.success('To Do successfully updated!');
                   }
+                },
+                onError: () => {
+                  toast.error('There was an error trying to update a To Do');
                 }
               }
             );
@@ -197,6 +222,7 @@ export function Index() {
             placeholder="Title"
             label="Title"
             required
+            error={errors.title?.message}
             {...register('title')}
           />
           <Textarea
@@ -204,6 +230,7 @@ export function Index() {
             placeholder="Long description..."
             label="Description"
             required
+            error={errors.description?.message}
             {...register('description')}
           />
           <Group mt="xl" position="right">
@@ -245,11 +272,11 @@ export function Index() {
             Cancel
           </Button>
           <Button
-            disabled={!todoId}
+            disabled={!todoId.current}
             loading={loadingTodoDelete}
             onClick={() => {
               deleteTodo(
-                { data: { id: todoId }, user: { jwt: token } },
+                { data: { id: todoId.current }, user: { jwt: token } },
                 {
                   onSuccess: ({ deleteToDo: { error } }) => {
                     if (!error) {
@@ -263,7 +290,7 @@ export function Index() {
                         {
                           getAllTodosFromUser:
                             query?.getAllTodosFromUser.filter(
-                              ({ id }) => id !== todoId
+                              ({ id }) => id !== todoId.current
                             ) || []
                         }
                       );
@@ -272,6 +299,9 @@ export function Index() {
 
                       toast.success('To Do successfully deleted!');
                     }
+                  },
+                  onError: () => {
+                    toast.error('There was an error trying to delete a To Do');
                   }
                 }
               );
@@ -313,27 +343,85 @@ export function Index() {
               </Center>
             </Box>
           </Box>
-          {query?.getAllTodosFromUser.map(({ description, id, title }) => (
-            <ToDoCard
-              key={id}
-              onClickDelete={() => {
-                setTodoId(id);
-                setDeleteModalOpen(true);
-              }}
-              onClickEdit={() => {
-                toggleModalTitle('Edit');
+          {query?.getAllTodosFromUser.map(
+            ({ description, id, title, state }) => (
+              <ToDoCard
+                key={id}
+                loading={
+                  loadingTodoDelete ||
+                  loadingTodoUpdate ||
+                  loadingTodoStateUpdate
+                }
+                onClickDelete={() => {
+                  todoId.current = id;
 
-                setTodoId(id);
+                  todoState.current = state;
 
-                setValue('title', title);
-                setValue('description', description);
+                  setDeleteModalOpen(true);
+                }}
+                onClickEdit={() => {
+                  toggleModalTitle('Edit');
 
-                setEditOrCreateModalOpen(true);
-              }}
-              description={description}
-              title={title}
-            />
-          ))}
+                  todoId.current = id;
+
+                  todoState.current = state;
+
+                  setValue('title', title);
+
+                  setValue('description', description);
+
+                  setEditOrCreateModalOpen(true);
+                }}
+                onChangeState={(status) => {
+                  updateTodoState(
+                    {
+                      data: { state: status, id },
+                      user: { jwt: token }
+                    },
+                    {
+                      onSuccess: ({ updateToDoState: { error } }) => {
+                        if (!error) {
+                          queryClient.setQueryData<GetAllToDoQuery>(
+                            [
+                              'GetAllToDo',
+                              {
+                                data: { jwt: token }
+                              }
+                            ],
+                            {
+                              getAllTodosFromUser:
+                                query?.getAllTodosFromUser.map((todo) => {
+                                  if (todo.id === id) {
+                                    return {
+                                      ...todo,
+                                      state: status
+                                    };
+                                  }
+
+                                  return todo;
+                                }) || []
+                            }
+                          );
+
+                          setEditOrCreateModalOpen(false);
+
+                          toast.success('To Do successfully updated!');
+                        }
+                      },
+                      onError: () => {
+                        toast.error(
+                          'There was an error trying to update a To Do'
+                        );
+                      }
+                    }
+                  );
+                }}
+                description={description}
+                title={title}
+                state={state}
+              />
+            )
+          )}
         </SimpleGrid>
       </Container>
     </>

@@ -7,5 +7,6 @@ query GetAllToDo($data: AuthenticatedUser!) {
     id
     title
     description
+    state
   }
 }
