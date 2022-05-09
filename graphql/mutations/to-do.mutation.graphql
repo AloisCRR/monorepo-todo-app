@@ -1,7 +1,33 @@
-mutation createNewTodo($data: AddNewToDo!, $user: AuthenticatedUser!) {
+type Mutation {
+  addNewToDo(data: NewToDo!, user: AuthenticatedUser!): ToDo
+  deleteToDo(
+    data: DeleteTodo!
+    user: AuthenticatedUser!
+  ): DeleteAndUpdateResponse!
+  updateToDo(
+    data: UpdateTodo!
+    user: AuthenticatedUser!
+  ): DeleteAndUpdateResponse!
+}
+
+mutation createNewTodo($data: NewToDo!, $user: AuthenticatedUser!) {
   addNewToDo(data: $data, user: $user) {
     id
     title
     description
+  }
+}
+
+mutation updateToDo($data: UpdateTodo!, $user: AuthenticatedUser!) {
+  updateToDo(data: $data, user: $user) {
+    message
+    error
+  }
+}
+
+mutation deleteToDo($data: DeleteTodo!, $user: AuthenticatedUser!) {
+  deleteToDo(data: $data, user: $user) {
+    message
+    error
   }
 }

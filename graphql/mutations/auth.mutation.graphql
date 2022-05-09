@@ -1,5 +1,18 @@
+type Mutation {
+  register(data: UserRegister!): AuthResponse!
+  login(data: UserRegister!): AuthResponse!
+}
+
 mutation Register($data: UserRegister!) {
   register(data: $data) {
     jwt
+    message
+  }
+}
+
+mutation Login($data: UserRegister!) {
+  login(data: $data) {
+    jwt
+    message
   }
 }

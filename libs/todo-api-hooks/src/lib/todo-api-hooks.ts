@@ -34,38 +34,66 @@ type Scalars = {
   Float: number;
 };
 
-type AddNewToDo = {
-  description: Scalars['String'];
-  title: Scalars['String'];
-};
-
 type AuthResponse = {
   __typename?: 'AuthResponse';
-  jwt: Scalars['String'];
+  jwt?: Maybe<Scalars['String']>;
+  message?: Maybe<Scalars['String']>;
 };
 
 type AuthenticatedUser = {
   jwt: Scalars['String'];
 };
 
+type DeleteAndUpdateResponse = {
+  __typename?: 'DeleteAndUpdateResponse';
+  error?: Maybe<Scalars['String']>;
+  message?: Maybe<Scalars['String']>;
+};
+
+type DeleteTodo = {
+  id: Scalars['String'];
+};
+
 type Mutation = {
   __typename?: 'Mutation';
-  addNewToDo: ToDo;
+  addNewToDo?: Maybe<ToDo>;
+  deleteToDo: DeleteAndUpdateResponse;
+  login: AuthResponse;
   register: AuthResponse;
+  updateToDo: DeleteAndUpdateResponse;
 };
 
 type MutationAddNewToDoArgs = {
-  data?: InputMaybe<AddNewToDo>;
-  user?: InputMaybe<AuthenticatedUser>;
+  data: NewToDo;
+  user: AuthenticatedUser;
+};
+
+type MutationDeleteToDoArgs = {
+  data: DeleteTodo;
+  user: AuthenticatedUser;
+};
+
+type MutationLoginArgs = {
+  data: UserRegister;
 };
 
 type MutationRegisterArgs = {
   data: UserRegister;
 };
 
+type MutationUpdateToDoArgs = {
+  data: UpdateTodo;
+  user: AuthenticatedUser;
+};
+
+type NewToDo = {
+  description: Scalars['String'];
+  title: Scalars['String'];
+};
+
 type Query = {
   __typename?: 'Query';
-  getAllTodosFromUser: Array<Maybe<ToDo>>;
+  getAllTodosFromUser: Array<ToDo>;
 };
 
 type QueryGetAllTodosFromUserArgs = {
@@ -74,6 +102,12 @@ type QueryGetAllTodosFromUserArgs = {
 
 type ToDo = {
   __typename?: 'ToDo';
+  description: Scalars['String'];
+  id: Scalars['String'];
+  title: Scalars['String'];
+};
+
+type UpdateTodo = {
   description: Scalars['String'];
   id: Scalars['String'];
   title: Scalars['String'];
@@ -90,21 +124,66 @@ type RegisterMutationVariables = Exact<{
 
 type RegisterMutation = {
   __typename?: 'Mutation';
-  register: { __typename?: 'AuthResponse'; jwt: string };
+  register: {
+    __typename?: 'AuthResponse';
+    jwt?: string | null;
+    message?: string | null;
+  };
+};
+
+type LoginMutationVariables = Exact<{
+  data: UserRegister;
+}>;
+
+type LoginMutation = {
+  __typename?: 'Mutation';
+  login: {
+    __typename?: 'AuthResponse';
+    jwt?: string | null;
+    message?: string | null;
+  };
 };
 
 type CreateNewTodoMutationVariables = Exact<{
-  data: AddNewToDo;
+  data: NewToDo;
   user: AuthenticatedUser;
 }>;
 
 type CreateNewTodoMutation = {
   __typename?: 'Mutation';
-  addNewToDo: {
+  addNewToDo?: {
     __typename?: 'ToDo';
     id: string;
     title: string;
     description: string;
+  } | null;
+};
+
+type UpdateToDoMutationVariables = Exact<{
+  data: UpdateTodo;
+  user: AuthenticatedUser;
+}>;
+
+type UpdateToDoMutation = {
+  __typename?: 'Mutation';
+  updateToDo: {
+    __typename?: 'DeleteAndUpdateResponse';
+    message?: string | null;
+    error?: string | null;
+  };
+};
+
+type DeleteToDoMutationVariables = Exact<{
+  data: DeleteTodo;
+  user: AuthenticatedUser;
+}>;
+
+type DeleteToDoMutation = {
+  __typename?: 'Mutation';
+  deleteToDo: {
+    __typename?: 'DeleteAndUpdateResponse';
+    message?: string | null;
+    error?: string | null;
   };
 };
 
@@ -119,13 +198,14 @@ type GetAllToDoQuery = {
     id: string;
     title: string;
     description: string;
-  } | null>;
+  }>;
 };
 
 const RegisterDocument = `
     mutation Register($data: UserRegister!) {
   register(data: $data) {
     jwt
+    message
   }
 }
     `;
@@ -150,8 +230,37 @@ export const useRegisterMutation = <TError = unknown, TContext = unknown>(
       )(),
     options
   );
+const LoginDocument = `
+    mutation Login($data: UserRegister!) {
+  login(data: $data) {
+    jwt
+    message
+  }
+}
+    `;
+export const useLoginMutation = <TError = unknown, TContext = unknown>(
+  client: GraphQLClient,
+  options?: UseMutationOptions<
+    LoginMutation,
+    TError,
+    LoginMutationVariables,
+    TContext
+  >,
+  headers?: RequestInit['headers']
+) =>
+  useMutation<LoginMutation, TError, LoginMutationVariables, TContext>(
+    ['Login'],
+    (variables?: LoginMutationVariables) =>
+      fetcher<LoginMutation, LoginMutationVariables>(
+        client,
+        LoginDocument,
+        variables,
+        headers
+      )(),
+    options
+  );
 const CreateNewTodoDocument = `
-    mutation createNewTodo($data: AddNewToDo!, $user: AuthenticatedUser!) {
+    mutation createNewTodo($data: NewToDo!, $user: AuthenticatedUser!) {
   addNewToDo(data: $data, user: $user) {
     id
     title
@@ -180,6 +289,74 @@ export const useCreateNewTodoMutation = <TError = unknown, TContext = unknown>(
       fetcher<CreateNewTodoMutation, CreateNewTodoMutationVariables>(
         client,
         CreateNewTodoDocument,
+        variables,
+        headers
+      )(),
+    options
+  );
+const UpdateToDoDocument = `
+    mutation updateToDo($data: UpdateTodo!, $user: AuthenticatedUser!) {
+  updateToDo(data: $data, user: $user) {
+    message
+    error
+  }
+}
+    `;
+export const useUpdateToDoMutation = <TError = unknown, TContext = unknown>(
+  client: GraphQLClient,
+  options?: UseMutationOptions<
+    UpdateToDoMutation,
+    TError,
+    UpdateToDoMutationVariables,
+    TContext
+  >,
+  headers?: RequestInit['headers']
+) =>
+  useMutation<
+    UpdateToDoMutation,
+    TError,
+    UpdateToDoMutationVariables,
+    TContext
+  >(
+    ['updateToDo'],
+    (variables?: UpdateToDoMutationVariables) =>
+      fetcher<UpdateToDoMutation, UpdateToDoMutationVariables>(
+        client,
+        UpdateToDoDocument,
+        variables,
+        headers
+      )(),
+    options
+  );
+const DeleteToDoDocument = `
+    mutation deleteToDo($data: DeleteTodo!, $user: AuthenticatedUser!) {
+  deleteToDo(data: $data, user: $user) {
+    message
+    error
+  }
+}
+    `;
+export const useDeleteToDoMutation = <TError = unknown, TContext = unknown>(
+  client: GraphQLClient,
+  options?: UseMutationOptions<
+    DeleteToDoMutation,
+    TError,
+    DeleteToDoMutationVariables,
+    TContext
+  >,
+  headers?: RequestInit['headers']
+) =>
+  useMutation<
+    DeleteToDoMutation,
+    TError,
+    DeleteToDoMutationVariables,
+    TContext
+  >(
+    ['deleteToDo'],
+    (variables?: DeleteToDoMutationVariables) =>
+      fetcher<DeleteToDoMutation, DeleteToDoMutationVariables>(
+        client,
+        DeleteToDoDocument,
         variables,
         headers
       )(),

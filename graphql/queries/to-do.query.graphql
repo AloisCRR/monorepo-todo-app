@@ -1,3 +1,7 @@
+type Query {
+  getAllTodosFromUser(data: AuthenticatedUser!): [ToDo!]!
+}
+
 query GetAllToDo($data: AuthenticatedUser!) {
   getAllTodosFromUser(data: $data) {
     id

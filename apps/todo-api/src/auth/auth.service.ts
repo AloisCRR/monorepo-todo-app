@@ -19,6 +19,28 @@ export class AuthService {
       data: { email: data.email, password: hashedPassword }
     });
 
-    return { jwt: this.jwtService.sign({ id: user.id }) };
+    return { jwt: this.jwtService.sign({ id: user.id }, { expiresIn: '7d' }) };
+  }
+
+  async loginUser(data: Prisma.UserCreateInput): Promise<AuthResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: data.email
+      }
+    });
+
+    if (!user) {
+      return { message: 'User not found, please register' };
+    }
+
+    const isPasswordCorrect = await argon2.verify(user.password, data.password);
+
+    if (!isPasswordCorrect) {
+      return {
+        message: 'Incorrect password or email, try again'
+      };
+    }
+
+    return { jwt: this.jwtService.sign({ id: user.id }, { expiresIn: '7d' }) };
   }
 }

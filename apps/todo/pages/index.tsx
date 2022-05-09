@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-props-no-spreading */
+import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Box,
   Button,
@@ -11,10 +13,22 @@ import {
   Textarea,
   TextInput
 } from '@mantine/core';
-import { useSetState } from '@mantine/hooks';
-import { useState } from 'react';
+import { useToggle } from '@mantine/hooks';
+import {
+  useCreateNewTodoMutation,
+  useDeleteToDoMutation,
+  useGetAllToDoQuery,
+  useUpdateToDoMutation
+} from '@monorepo-todo-app/todo-api-hooks';
+import type { GetAllToDoQuery } from '@monorepo-todo-app/todo-api-interfaces';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useQueryClient } from 'react-query';
+import { toast } from 'react-toastify';
 import { AlertCircle, Plus } from 'tabler-icons-react';
+import { object, SchemaOf, string } from 'yup';
 import ToDoCard from '../components/to-do-card/to-do-card';
+import graphQlClient from '../utils/graphql-client';
 
 const useStyles = createStyles((theme) => ({
   new: {
@@ -30,17 +44,65 @@ const useStyles = createStyles((theme) => ({
   innerNew: {
     border: `3px dashed ${theme.colors.dark[3]}`,
     borderRadius: theme.radius.lg,
-    height: '100%'
+    height: '100%',
+    padding: theme.spacing.xl
   }
 }));
 
+type ToDoForm = {
+  title: string;
+  description: string;
+};
+
+const formValidation: SchemaOf<ToDoForm> = object({
+  description: string().required(),
+  title: string().required()
+});
+
 export function Index() {
   const [editOrCreateModalOpen, setEditOrCreateModalOpen] = useState(false);
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-  const [todoData, setTodoData] = useSetState({ title: '', description: '' });
+
+  const [modalTitle, toggleModalTitle] = useToggle('New todo', [
+    'New todo',
+    'Edit'
+  ]);
+
+  const [todoId, setTodoId] = useState('');
+
+  const [token, setToken] = useState('');
 
   const { classes } = useStyles();
+
+  const { handleSubmit, register, setValue, reset } = useForm<ToDoForm>({
+    resolver: yupResolver(formValidation),
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit'
+  });
+
+  useEffect(() => {
+    setToken(localStorage.getItem('jwt-monorepo-app') || '');
+  }, []);
+
+  const { data: query } = useGetAllToDoQuery(
+    graphQlClient,
+    {
+      data: { jwt: token }
+    },
+    { enabled: !!token, refetchOnMount: false, refetchOnWindowFocus: false }
+  );
+
+  const { mutate: createNewTodo, isLoading: loadingNewTodo } =
+    useCreateNewTodoMutation(graphQlClient);
+
+  const { mutate: deleteTodo, isLoading: loadingTodoDelete } =
+    useDeleteToDoMutation(graphQlClient);
+
+  const { mutate: updateTodo, isLoading: loadingTodoUpdate } =
+    useUpdateToDoMutation(graphQlClient);
+
+  const queryClient = useQueryClient();
 
   return (
     <>
@@ -52,34 +114,109 @@ export function Index() {
         }}
         title={modalTitle}
       >
-        <form>
+        <form
+          onSubmit={handleSubmit((data) => {
+            if (modalTitle === 'New todo') {
+              createNewTodo(
+                {
+                  data,
+                  user: { jwt: localStorage.getItem('jwt-monorepo-app') || '' }
+                },
+                {
+                  onSuccess: ({ addNewToDo }) => {
+                    if (addNewToDo) {
+                      queryClient.setQueryData<GetAllToDoQuery>(
+                        [
+                          'GetAllToDo',
+                          {
+                            data: { jwt: token }
+                          }
+                        ],
+                        {
+                          getAllTodosFromUser: [
+                            ...(query?.getAllTodosFromUser || []),
+                            addNewToDo
+                          ]
+                        }
+                      );
+
+                      setEditOrCreateModalOpen(false);
+
+                      toast.success('To Do successfully created!');
+                    }
+                  }
+                }
+              );
+
+              return;
+            }
+
+            updateTodo(
+              {
+                data: {
+                  ...data,
+                  id: todoId
+                },
+                user: { jwt: localStorage.getItem('jwt-monorepo-app') || '' }
+              },
+              {
+                onSuccess: ({ updateToDo: { error } }) => {
+                  if (!error) {
+                    queryClient.setQueryData<GetAllToDoQuery>(
+                      [
+                        'GetAllToDo',
+                        {
+                          data: { jwt: token }
+                        }
+                      ],
+                      {
+                        getAllTodosFromUser:
+                          query?.getAllTodosFromUser.map((todo) => {
+                            if (todo.id === todoId) {
+                              return {
+                                ...data,
+                                id: todoId
+                              };
+                            }
+
+                            return todo;
+                          }) || []
+                      }
+                    );
+
+                    setEditOrCreateModalOpen(false);
+
+                    toast.success('To Do successfully updated!');
+                  }
+                }
+              }
+            );
+          })}
+        >
           <TextInput
-            defaultValue={todoData.title}
             placeholder="Title"
             label="Title"
             required
+            {...register('title')}
           />
           <Textarea
             mt="xs"
-            defaultValue={todoData.description}
             placeholder="Long description..."
             label="Description"
             required
+            {...register('description')}
           />
           <Group mt="xl" position="right">
             <Button
               onClick={() => {
                 setEditOrCreateModalOpen(false);
+                reset();
               }}
               variant="outline"
             >
               Cancel
             </Button>
-            <Button
-              onClick={() => {
-                setEditOrCreateModalOpen(false);
-              }}
-            >
+            <Button loading={loadingNewTodo || loadingTodoUpdate} type="submit">
               Save
             </Button>
           </Group>
@@ -100,15 +237,44 @@ export function Index() {
         <Group mt="xl" position="right">
           <Button
             onClick={() => {
-              setEditOrCreateModalOpen(false);
+              setDeleteModalOpen(false);
+              reset();
             }}
             variant="outline"
           >
             Cancel
           </Button>
           <Button
+            disabled={!todoId}
+            loading={loadingTodoDelete}
             onClick={() => {
-              setEditOrCreateModalOpen(false);
+              deleteTodo(
+                { data: { id: todoId }, user: { jwt: token } },
+                {
+                  onSuccess: ({ deleteToDo: { error } }) => {
+                    if (!error) {
+                      queryClient.setQueryData<GetAllToDoQuery>(
+                        [
+                          'GetAllToDo',
+                          {
+                            data: { jwt: token }
+                          }
+                        ],
+                        {
+                          getAllTodosFromUser:
+                            query?.getAllTodosFromUser.filter(
+                              ({ id }) => id !== todoId
+                            ) || []
+                        }
+                      );
+
+                      setDeleteModalOpen(false);
+
+                      toast.success('To Do successfully deleted!');
+                    }
+                  }
+                }
+              );
             }}
             color="red"
             rightIcon={<AlertCircle />}
@@ -120,15 +286,18 @@ export function Index() {
       <Container size="xl">
         <SimpleGrid
           breakpoints={[
-            { minWidth: 768, cols: 4, spacing: 'sm' },
+            { minWidth: 1024, cols: 4, spacing: 'sm' },
+            { minWidth: 768, cols: 3, spacing: 'sm' },
             { minWidth: 500, cols: 2, spacing: 'sm' },
             { maxWidth: 300, cols: 1, spacing: 'sm' }
           ]}
         >
           <Box
             onClick={() => {
-              setModalTitle('New todo');
-              setTodoData({ description: '', title: '' });
+              toggleModalTitle('New todo');
+
+              reset();
+
               setEditOrCreateModalOpen(true);
             }}
             className={classes.new}
@@ -144,22 +313,27 @@ export function Index() {
               </Center>
             </Box>
           </Box>
-          <ToDoCard
-            onClickDelete={() => {
-              setDeleteModalOpen(true);
-            }}
-            onClickEdit={() => {
-              setModalTitle('Edit');
-              setEditOrCreateModalOpen(true);
-              setTodoData({
-                description:
-                  'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente, sint!',
-                title: 'Hola'
-              });
-            }}
-            description="Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente, sint!"
-            title="Hola"
-          />
+          {query?.getAllTodosFromUser.map(({ description, id, title }) => (
+            <ToDoCard
+              key={id}
+              onClickDelete={() => {
+                setTodoId(id);
+                setDeleteModalOpen(true);
+              }}
+              onClickEdit={() => {
+                toggleModalTitle('Edit');
+
+                setTodoId(id);
+
+                setValue('title', title);
+                setValue('description', description);
+
+                setEditOrCreateModalOpen(true);
+              }}
+              description={description}
+              title={title}
+            />
+          ))}
         </SimpleGrid>
       </Container>
     </>

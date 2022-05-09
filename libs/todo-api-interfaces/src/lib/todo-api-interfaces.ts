@@ -23,38 +23,66 @@ export type Scalars = {
   Float: number;
 };
 
-export type AddNewToDo = {
-  description: Scalars['String'];
-  title: Scalars['String'];
-};
-
 export type AuthResponse = {
   __typename?: 'AuthResponse';
-  jwt: Scalars['String'];
+  jwt?: Maybe<Scalars['String']>;
+  message?: Maybe<Scalars['String']>;
 };
 
 export type AuthenticatedUser = {
   jwt: Scalars['String'];
 };
 
+export type DeleteAndUpdateResponse = {
+  __typename?: 'DeleteAndUpdateResponse';
+  error?: Maybe<Scalars['String']>;
+  message?: Maybe<Scalars['String']>;
+};
+
+export type DeleteTodo = {
+  id: Scalars['String'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
-  addNewToDo: ToDo;
+  addNewToDo?: Maybe<ToDo>;
+  deleteToDo: DeleteAndUpdateResponse;
+  login: AuthResponse;
   register: AuthResponse;
+  updateToDo: DeleteAndUpdateResponse;
 };
 
 export type MutationAddNewToDoArgs = {
-  data?: InputMaybe<AddNewToDo>;
-  user?: InputMaybe<AuthenticatedUser>;
+  data: NewToDo;
+  user: AuthenticatedUser;
+};
+
+export type MutationDeleteToDoArgs = {
+  data: DeleteTodo;
+  user: AuthenticatedUser;
+};
+
+export type MutationLoginArgs = {
+  data: UserRegister;
 };
 
 export type MutationRegisterArgs = {
   data: UserRegister;
 };
 
+export type MutationUpdateToDoArgs = {
+  data: UpdateTodo;
+  user: AuthenticatedUser;
+};
+
+export type NewToDo = {
+  description: Scalars['String'];
+  title: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
-  getAllTodosFromUser: Array<Maybe<ToDo>>;
+  getAllTodosFromUser: Array<ToDo>;
 };
 
 export type QueryGetAllTodosFromUserArgs = {
@@ -63,6 +91,12 @@ export type QueryGetAllTodosFromUserArgs = {
 
 export type ToDo = {
   __typename?: 'ToDo';
+  description: Scalars['String'];
+  id: Scalars['String'];
+  title: Scalars['String'];
+};
+
+export type UpdateTodo = {
   description: Scalars['String'];
   id: Scalars['String'];
   title: Scalars['String'];
@@ -79,21 +113,66 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = {
   __typename?: 'Mutation';
-  register: { __typename?: 'AuthResponse'; jwt: string };
+  register: {
+    __typename?: 'AuthResponse';
+    jwt?: string | null;
+    message?: string | null;
+  };
+};
+
+export type LoginMutationVariables = Exact<{
+  data: UserRegister;
+}>;
+
+export type LoginMutation = {
+  __typename?: 'Mutation';
+  login: {
+    __typename?: 'AuthResponse';
+    jwt?: string | null;
+    message?: string | null;
+  };
 };
 
 export type CreateNewTodoMutationVariables = Exact<{
-  data: AddNewToDo;
+  data: NewToDo;
   user: AuthenticatedUser;
 }>;
 
 export type CreateNewTodoMutation = {
   __typename?: 'Mutation';
-  addNewToDo: {
+  addNewToDo?: {
     __typename?: 'ToDo';
     id: string;
     title: string;
     description: string;
+  } | null;
+};
+
+export type UpdateToDoMutationVariables = Exact<{
+  data: UpdateTodo;
+  user: AuthenticatedUser;
+}>;
+
+export type UpdateToDoMutation = {
+  __typename?: 'Mutation';
+  updateToDo: {
+    __typename?: 'DeleteAndUpdateResponse';
+    message?: string | null;
+    error?: string | null;
+  };
+};
+
+export type DeleteToDoMutationVariables = Exact<{
+  data: DeleteTodo;
+  user: AuthenticatedUser;
+}>;
+
+export type DeleteToDoMutation = {
+  __typename?: 'Mutation';
+  deleteToDo: {
+    __typename?: 'DeleteAndUpdateResponse';
+    message?: string | null;
+    error?: string | null;
   };
 };
 
@@ -108,7 +187,7 @@ export type GetAllToDoQuery = {
     id: string;
     title: string;
     description: string;
-  } | null>;
+  }>;
 };
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -218,27 +297,33 @@ export type DirectiveResolverFn<
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  AddNewToDo: AddNewToDo;
   AuthResponse: ResolverTypeWrapper<AuthResponse>;
   AuthenticatedUser: AuthenticatedUser;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  DeleteAndUpdateResponse: ResolverTypeWrapper<DeleteAndUpdateResponse>;
+  DeleteTodo: DeleteTodo;
   Mutation: ResolverTypeWrapper<{}>;
+  NewToDo: NewToDo;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   ToDo: ResolverTypeWrapper<ToDo>;
+  UpdateTodo: UpdateTodo;
   UserRegister: UserRegister;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  AddNewToDo: AddNewToDo;
   AuthResponse: AuthResponse;
   AuthenticatedUser: AuthenticatedUser;
   Boolean: Scalars['Boolean'];
+  DeleteAndUpdateResponse: DeleteAndUpdateResponse;
+  DeleteTodo: DeleteTodo;
   Mutation: {};
+  NewToDo: NewToDo;
   Query: {};
   String: Scalars['String'];
   ToDo: ToDo;
+  UpdateTodo: UpdateTodo;
   UserRegister: UserRegister;
 };
 
@@ -246,7 +331,17 @@ export type AuthResponseResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes['AuthResponse'] = ResolversParentTypes['AuthResponse']
 > = {
-  jwt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  jwt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeleteAndUpdateResponseResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeleteAndUpdateResponse'] = ResolversParentTypes['DeleteAndUpdateResponse']
+> = {
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -255,16 +350,34 @@ export type MutationResolvers<
   ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']
 > = {
   addNewToDo?: Resolver<
-    ResolversTypes['ToDo'],
+    Maybe<ResolversTypes['ToDo']>,
     ParentType,
     ContextType,
-    Partial<MutationAddNewToDoArgs>
+    RequireFields<MutationAddNewToDoArgs, 'data' | 'user'>
+  >;
+  deleteToDo?: Resolver<
+    ResolversTypes['DeleteAndUpdateResponse'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationDeleteToDoArgs, 'data' | 'user'>
+  >;
+  login?: Resolver<
+    ResolversTypes['AuthResponse'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationLoginArgs, 'data'>
   >;
   register?: Resolver<
     ResolversTypes['AuthResponse'],
     ParentType,
     ContextType,
     RequireFields<MutationRegisterArgs, 'data'>
+  >;
+  updateToDo?: Resolver<
+    ResolversTypes['DeleteAndUpdateResponse'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationUpdateToDoArgs, 'data' | 'user'>
   >;
 };
 
@@ -273,7 +386,7 @@ export type QueryResolvers<
   ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
 > = {
   getAllTodosFromUser?: Resolver<
-    Array<Maybe<ResolversTypes['ToDo']>>,
+    Array<ResolversTypes['ToDo']>,
     ParentType,
     ContextType,
     RequireFields<QueryGetAllTodosFromUserArgs, 'data'>
@@ -292,6 +405,7 @@ export type ToDoResolvers<
 
 export type Resolvers<ContextType = any> = {
   AuthResponse?: AuthResponseResolvers<ContextType>;
+  DeleteAndUpdateResponse?: DeleteAndUpdateResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   ToDo?: ToDoResolvers<ContextType>;
@@ -301,15 +415,40 @@ export const Register = gql`
   mutation Register($data: UserRegister!) {
     register(data: $data) {
       jwt
+      message
+    }
+  }
+`;
+export const Login = gql`
+  mutation Login($data: UserRegister!) {
+    login(data: $data) {
+      jwt
+      message
     }
   }
 `;
 export const CreateNewTodo = gql`
-  mutation createNewTodo($data: AddNewToDo!, $user: AuthenticatedUser!) {
+  mutation createNewTodo($data: NewToDo!, $user: AuthenticatedUser!) {
     addNewToDo(data: $data, user: $user) {
       id
       title
       description
+    }
+  }
+`;
+export const UpdateToDo = gql`
+  mutation updateToDo($data: UpdateTodo!, $user: AuthenticatedUser!) {
+    updateToDo(data: $data, user: $user) {
+      message
+      error
+    }
+  }
+`;
+export const DeleteToDo = gql`
+  mutation deleteToDo($data: DeleteTodo!, $user: AuthenticatedUser!) {
+    deleteToDo(data: $data, user: $user) {
+      message
+      error
     }
   }
 `;

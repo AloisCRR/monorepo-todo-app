@@ -4,9 +4,6 @@ input UserRegister {
 }
 
 type AuthResponse {
-  jwt: String!
-}
-
-type Mutation {
-  register(data: UserRegister!): AuthResponse!
+  jwt: String
+  message: String
 }

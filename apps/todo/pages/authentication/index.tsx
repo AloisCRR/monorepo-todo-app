@@ -12,14 +12,17 @@ import {
   TextInput
 } from '@mantine/core';
 import { upperFirst, useToggle } from '@mantine/hooks';
-import { useRegisterMutation } from '@monorepo-todo-app/todo-api-hooks';
-import { GraphQLClient } from 'graphql-request';
+import {
+  useLoginMutation,
+  useRegisterMutation
+} from '@monorepo-todo-app/todo-api-hooks';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { BrandGithub, BrandGoogle } from 'tabler-icons-react';
 import { object, string, type SchemaOf } from 'yup';
+import graphQlClient from '../../utils/graphql-client';
 
 type LoginRegisterForm = {
   email: string;
@@ -50,9 +53,8 @@ export default function AuthenticationForm() {
     }
   });
 
-  const { mutate: registerUser } = useRegisterMutation(
-    new GraphQLClient('http://localhost:3333/graphql')
-  );
+  const { mutate: registerUser } = useRegisterMutation(graphQlClient);
+  const { mutate: loginUser } = useLoginMutation(graphQlClient);
 
   const { replace, query } = useRouter();
 
@@ -91,15 +93,51 @@ export default function AuthenticationForm() {
               registerUser(
                 { data },
                 {
-                  onSuccess: async ({ register: { jwt } }) => {
+                  onSuccess: async ({ register: { jwt, message } }) => {
+                    if (!jwt) {
+                      toast.error(
+                        message || 'Error when registering, try again'
+                      );
+
+                      return;
+                    }
+
                     toast.success('Register completed!');
                     localStorage.setItem('jwt-monorepo-app', jwt);
 
-                    await replace({ pathname: String(query['returnUrl']) });
+                    await replace({
+                      pathname: query['returnUrl']
+                        ? String(query['returnUrl'])
+                        : '/'
+                    });
                   }
                 }
               );
+
+              return;
             }
+
+            loginUser(
+              { data },
+              {
+                onSuccess: async ({ login: { jwt, message } }) => {
+                  if (!jwt) {
+                    toast.error(message || 'Error when registering, try again');
+
+                    return;
+                  }
+
+                  toast.success('Login completed!');
+                  localStorage.setItem('jwt-monorepo-app', jwt);
+
+                  await replace({
+                    pathname: query['returnUrl']
+                      ? String(query['returnUrl'])
+                      : '/'
+                  });
+                }
+              }
+            );
           })}
         >
           <Group direction="column" grow>

@@ -10,4 +10,9 @@ export class AuthResolver {
   async register(@Args('data') data: UserRegister) {
     return await this.authService.createUser(data);
   }
+
+  @Mutation()
+  async login(@Args('data') data: UserRegister) {
+    return await this.authService.loginUser(data);
+  }
 }

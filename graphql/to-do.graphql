@@ -4,19 +4,26 @@ type ToDo {
   description: String!
 }
 
+type DeleteAndUpdateResponse {
+  message: String
+  error: String
+}
+
 input AuthenticatedUser {
   jwt: String!
 }
 
-input AddNewToDo {
+input NewToDo {
   title: String!
   description: String!
 }
 
-type Query {
-  getAllTodosFromUser(data: AuthenticatedUser!): [ToDo]!
+input DeleteTodo {
+  id: String!
 }
 
-type Mutation {
-  addNewToDo(data: AddNewToDo!, user: AuthenticatedUser!): ToDo!
+input UpdateTodo {
+  id: String!
+  title: String!
+  description: String!
 }

@@ -11,7 +11,8 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@next/next/no-html-link-for-pages": ["error", "apps/todo/pages"]
+        "@next/next/no-html-link-for-pages": ["error", "apps/todo/pages"],
+        "operator-linebreak": "off"
       },
       "parserOptions": {
         "project": ["apps/todo/tsconfig(.*)?.json"]
