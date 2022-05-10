@@ -65,7 +65,7 @@ function App({
               <Component {...pageProps} />
             </Hydrate>
           </QueryClientProvider>
-          <ToastContainer />
+          <ToastContainer autoClose={2000} />
         </AppShell>
       </MantineProvider>
     </>
