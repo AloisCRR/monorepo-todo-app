@@ -12,6 +12,8 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
+  app.enableCors();
+
   if (String(process.env['NODE_ENV']) !== 'production') {
     // @ts-expect-error Incompatible interfaces between @nestjs/platform-fastify and fastify
     void app.register(AltairFastify, {
