@@ -22,7 +22,7 @@ function App({
   const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
-    const publicRoutes = ['/authentication'];
+    const publicRoutes = ['/authentication', '/'];
 
     const token = localStorage.getItem('jwt-monorepo-app');
 

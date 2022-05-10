@@ -2,15 +2,17 @@
   "extends": ["airbnb", "airbnb-typescript"],
   "rules": {
     "no-console": "error",
-    "object-curly-newline": ["off"],
+    "implicit-arrow-linebreak": "off",
+    "react/jsx-curly-newline": "off",
+    "object-curly-newline": "off",
     "react/jsx-wrap-multilines": ["error", { "prop": "ignore" }],
-    "react/jsx-one-expression-per-line": ["off"],
+    "react/jsx-one-expression-per-line": "off",
     "@typescript-eslint/no-misused-promises": [
       "error",
       {
         "checksVoidReturn": false
       }
     ],
-    "react/require-default-props": ["off"]
+    "react/require-default-props": "off"
   }
 }

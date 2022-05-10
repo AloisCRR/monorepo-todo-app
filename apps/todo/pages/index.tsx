@@ -4,22 +4,21 @@ import {
   Center,
   Container,
   createStyles,
+  Image,
   Text,
   Title
 } from '@mantine/core';
-import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { ArrowRight } from 'tabler-icons-react';
-import phoneMockup from '../public/images/phone-mockup.png';
 
 const gradientStyles = {
   backgroundSize: '100%',
   backgroundRepeat: 'repeat',
-  '-webkit-background-clip': 'text',
-  '-webkit-text-fill-color': 'transparent',
-  '-moz-background-clip': 'text',
-  '-moz-text-fill-color': 'transparent'
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  MozBackgroundClip: 'text',
+  MozTextFillColor: 'transparent'
 };
 
 const useStyles = createStyles((theme) => ({
@@ -113,7 +112,12 @@ export function Index() {
         </div>
         <Center>
           <Box className={classes.image}>
-            <Image src={phoneMockup} alt="App mockup in phone" />
+            <Image
+              src="https://i.postimg.cc/xTF4zCNY/Screen-Shot-2022-05-09-at-21-45-32-google-pixel5-justblack-portrait.png"
+              alt="App mockup in phone"
+              width={1480 / 4}
+              height={2740 / 4}
+            />
           </Box>
         </Center>
       </div>
