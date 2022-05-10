@@ -83,6 +83,7 @@ export type MutationUpdateToDoStateArgs = {
 
 export type NewToDo = {
   description: Scalars['String'];
+  state?: InputMaybe<ToDoState>;
   title: Scalars['String'];
 };
 

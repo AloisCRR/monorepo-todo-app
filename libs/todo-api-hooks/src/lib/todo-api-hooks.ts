@@ -94,6 +94,7 @@ type MutationUpdateToDoStateArgs = {
 
 type NewToDo = {
   description: Scalars['String'];
+  state?: InputMaybe<ToDoState>;
   title: Scalars['String'];
 };
 

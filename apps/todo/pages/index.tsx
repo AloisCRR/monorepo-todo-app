@@ -8,6 +8,7 @@ import {
   createStyles,
   Group,
   Modal,
+  SegmentedControl,
   SimpleGrid,
   Text,
   Textarea,
@@ -29,7 +30,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from 'react-query';
 import { toast } from 'react-toastify';
-import { AlertCircle, Plus } from 'tabler-icons-react';
+import { AlertCircle, Check, Checks, Clock, Plus } from 'tabler-icons-react';
 import { object, SchemaOf, string } from 'yup';
 import ToDoCard from '../components/to-do-card/to-do-card';
 import graphQlClient from '../utils/graphql-client';
@@ -76,11 +77,14 @@ export function Index() {
   ]);
 
   const todoId = useRef('');
+
   const todoState = useRef<ToDoState>(ToDoState.Todo);
+
+  const [todoFilter, setTodoFilter] = useState(ToDoState.Todo);
 
   const [token, setToken] = useState('');
 
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
 
   const {
     handleSubmit,
@@ -137,7 +141,10 @@ export function Index() {
             if (modalTitle === 'New todo') {
               createNewTodo(
                 {
-                  data,
+                  data: {
+                    ...data,
+                    state: todoFilter
+                  },
                   user: { jwt: localStorage.getItem('jwt-monorepo-app') || '' }
                 },
                 {
@@ -313,6 +320,44 @@ export function Index() {
           </Button>
         </Group>
       </Modal>
+      <Center mb="lg">
+        <SegmentedControl
+          onChange={(value: ToDoState) => {
+            setTodoFilter(value);
+          }}
+          transitionDuration={500}
+          transitionTimingFunction="ease-in-out"
+          data={[
+            {
+              label: (
+                <Center>
+                  <Clock size={16} color={theme.colors.red[5]} />
+                  <Box ml={10}>To Do</Box>
+                </Center>
+              ),
+              value: ToDoState.Todo
+            },
+            {
+              label: (
+                <Center>
+                  <Check size={16} color={theme.colors.orange[5]} />
+                  <Box ml={10}>In progress</Box>
+                </Center>
+              ),
+              value: ToDoState.InProgress
+            },
+            {
+              label: (
+                <Center>
+                  <Checks size={16} color={theme.colors.green[5]} />
+                  <Box ml={10}>Done</Box>
+                </Center>
+              ),
+              value: ToDoState.Done
+            }
+          ]}
+        />
+      </Center>
       <Container size="xl">
         <SimpleGrid
           breakpoints={[
@@ -343,8 +388,9 @@ export function Index() {
               </Center>
             </Box>
           </Box>
-          {query?.getAllTodosFromUser.map(
-            ({ description, id, title, state }) => (
+          {query?.getAllTodosFromUser
+            .filter(({ state }) => state === todoFilter)
+            .map(({ description, id, title, state }) => (
               <ToDoCard
                 key={id}
                 loading={
@@ -420,8 +466,7 @@ export function Index() {
                 title={title}
                 state={state}
               />
-            )
-          )}
+            ))}
         </SimpleGrid>
       </Container>
     </>

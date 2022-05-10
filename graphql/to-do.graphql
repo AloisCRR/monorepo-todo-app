@@ -23,6 +23,7 @@ input AuthenticatedUser {
 input NewToDo {
   title: String!
   description: String!
+  state: ToDoState
 }
 
 input DeleteTodo {
