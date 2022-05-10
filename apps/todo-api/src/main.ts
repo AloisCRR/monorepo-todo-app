@@ -12,12 +12,14 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
-  // @ts-expect-error Incompatible interfaces between @nestjs/platform-fastify and fastify
-  void app.register(AltairFastify, {
-    path: '/altair',
-    baseURL: '/altair/',
-    endpointURL: '/graphql'
-  });
+  if (String(process.env['NODE_ENV']) !== 'production') {
+    // @ts-expect-error Incompatible interfaces between @nestjs/platform-fastify and fastify
+    void app.register(AltairFastify, {
+      path: '/altair',
+      baseURL: '/altair/',
+      endpointURL: '/graphql'
+    });
+  }
 
   await app.listen(process.env['PORT'] || 3333, '0.0.0.0');
 }
