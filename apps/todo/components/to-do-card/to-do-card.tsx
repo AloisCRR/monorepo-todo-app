@@ -82,7 +82,7 @@ export default function ToDoCard({
           className={classes.expand}
         >
           <Menu.Item
-            disabled={loading}
+            disabled={loading || state === ToDoState.Done}
             onClick={() => {
               onChangeState(ToDoState.Done);
             }}
@@ -91,7 +91,7 @@ export default function ToDoCard({
             Mark as done
           </Menu.Item>
           <Menu.Item
-            disabled={loading}
+            disabled={loading || state === ToDoState.InProgress}
             onClick={() => {
               onChangeState(ToDoState.InProgress);
             }}
@@ -100,7 +100,7 @@ export default function ToDoCard({
             Mark in progress
           </Menu.Item>
           <Menu.Item
-            disabled={loading}
+            disabled={loading || state === ToDoState.Todo}
             onClick={() => {
               onChangeState(ToDoState.Todo);
             }}
