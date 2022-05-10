@@ -25,7 +25,12 @@ export default function ToDoAppHeader() {
         <Title align="center" order={3}>
           Monorepo ToDo App
         </Title>
-        <ActionIcon>
+        <ActionIcon<'a'>
+          component="a"
+          href="https://github.com/AloisCRR/monorepo-todo-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <BrandGithub size={18} />
         </ActionIcon>
       </Container>
