@@ -53,8 +53,11 @@ export default function AuthenticationForm() {
     }
   });
 
-  const { mutate: registerUser } = useRegisterMutation(graphQlClient);
-  const { mutate: loginUser } = useLoginMutation(graphQlClient);
+  const { mutate: registerUser, isLoading: loadingRegister } =
+    useRegisterMutation(graphQlClient);
+
+  const { mutate: loginUser, isLoading: loadingLogin } =
+    useLoginMutation(graphQlClient);
 
   const { replace, query } = useRouter();
 
@@ -169,7 +172,13 @@ export default function AuthenticationForm() {
                 ? 'Already have an account? Login'
                 : "Don't have an account? Register"}
             </Anchor>
-            <Button type="submit">{upperFirst(type)}</Button>
+            <Button
+              color="teal"
+              loading={loadingLogin || loadingRegister}
+              type="submit"
+            >
+              {upperFirst(type)}
+            </Button>
           </Group>
         </form>
       </Paper>
