@@ -13,7 +13,8 @@ import { ToDoModule } from './to-do/to-do.module';
       graphiql: false,
       ide: false,
       path: '/graphql',
-      typePaths: [`${join(process.cwd(), 'graphql')}/**/*.graphql`]
+      typePaths: [`${join(process.cwd(), 'graphql')}/**/*.graphql`],
+      context: ({ raw }: { raw: unknown }) => ({ raw })
     }),
     AuthModule
   ]

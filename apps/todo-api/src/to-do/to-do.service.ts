@@ -1,5 +1,4 @@
 import type {
-  AuthenticatedUser,
   DeleteAndUpdateResponse,
   DeleteTodo,
   NewToDo,
@@ -7,48 +6,19 @@ import type {
   UpdateTodoState
 } from '@monorepo-todo-app/todo-api-interfaces';
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import type { ToDo } from '@prisma/client';
 import PrismaService from '../prisma.service';
 
 @Injectable()
 export default class ToDoService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async getAllToDosFromUser(data: AuthenticatedUser): Promise<ToDo[]> {
-    let userId: string;
-
-    try {
-      const { id } = this.jwtService.verify<{ id: string }>(data.jwt);
-
-      userId = id;
-    } catch (error) {
-      return [];
-    }
-
-    const result = await this.prisma.toDo.findMany({ where: { userId } });
-
-    return result;
+  async getAllToDosFromUser(userId: string): Promise<ToDo[]> {
+    return this.prisma.toDo.findMany({ where: { userId } });
   }
 
-  async addNewToDo(
-    data: NewToDo,
-    user: AuthenticatedUser
-  ): Promise<ToDo | null> {
-    let userId: string;
-
-    try {
-      const { id } = this.jwtService.verify<{ id: string }>(user.jwt);
-
-      userId = id;
-    } catch (error) {
-      return null;
-    }
-
-    return await this.prisma.toDo.create({
+  async addNewToDo(data: NewToDo, userId: string): Promise<ToDo | null> {
+    return this.prisma.toDo.create({
       data: {
         description: data.description,
         title: data.title,
@@ -60,20 +30,8 @@ export default class ToDoService {
 
   async deleteToDo(
     data: DeleteTodo,
-    user: AuthenticatedUser
+    userId: string
   ): Promise<DeleteAndUpdateResponse> {
-    let userId: string;
-
-    try {
-      const { id } = this.jwtService.verify<{ id: string }>(user.jwt);
-
-      userId = id;
-    } catch (error) {
-      return {
-        error: (error as Error).message
-      };
-    }
-
     await this.prisma.toDo.delete({
       where: {
         id_userId: {
@@ -90,20 +48,8 @@ export default class ToDoService {
 
   async updateToDo(
     data: UpdateTodo,
-    user: AuthenticatedUser
+    userId: string
   ): Promise<DeleteAndUpdateResponse> {
-    let userId: string;
-
-    try {
-      const { id } = this.jwtService.verify<{ id: string }>(user.jwt);
-
-      userId = id;
-    } catch (error) {
-      return {
-        error: (error as Error).message
-      };
-    }
-
     await this.prisma.toDo.update({
       data,
       where: {
@@ -118,20 +64,8 @@ export default class ToDoService {
 
   async updateTodoState(
     data: UpdateTodoState,
-    user: AuthenticatedUser
+    userId: string
   ): Promise<DeleteAndUpdateResponse> {
-    let userId: string;
-
-    try {
-      const { id } = this.jwtService.verify<{ id: string }>(user.jwt);
-
-      userId = id;
-    } catch (error) {
-      return {
-        error: (error as Error).message
-      };
-    }
-
     await this.prisma.toDo.update({
       data,
       where: {
