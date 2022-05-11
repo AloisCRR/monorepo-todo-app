@@ -3,7 +3,7 @@ import { AppShell, MantineProvider } from '@mantine/core';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -21,7 +21,9 @@ function App({
 
   const [queryClient] = useState(() => new QueryClient());
 
-  useEffect(() => {
+  const effect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+  effect(() => {
     const publicRoutes = ['/authentication', '/'];
 
     const token = localStorage.getItem('jwt-monorepo-app');
@@ -39,8 +41,6 @@ function App({
           toast.error('Change route error');
         });
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.pathname]);
 
   return (

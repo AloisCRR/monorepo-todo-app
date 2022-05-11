@@ -9,7 +9,7 @@ import {
   Title
 } from '@mantine/core';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight } from 'tabler-icons-react';
 
 const gradientStyles = {
@@ -82,6 +82,12 @@ const useStyles = createStyles((theme) => ({
 export function Index() {
   const { classes } = useStyles();
 
+  const [userToken, setUserToken] = useState('');
+
+  useEffect(() => {
+    setUserToken(localStorage.getItem('jwt-monorepo-app') || '');
+  }, []);
+
   return (
     <Container>
       <div className={classes.inner}>
@@ -97,7 +103,7 @@ export function Index() {
             Basic implementation to test integration between multiple frameworks
             and GraphQL using code generation and shared types.
           </Text>
-          <Link href="/app" passHref>
+          <Link href={userToken ? '/app' : '/authentication'} passHref>
             <Button
               mt={30}
               color="teal"

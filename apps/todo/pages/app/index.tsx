@@ -71,10 +71,10 @@ export function AppIndex() {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
-  const [modalTitle, toggleModalTitle] = useToggle('New todo', [
+  const [modalTitle, toggleModalTitle] = useToggle<'New todo' | 'Edit'>(
     'New todo',
-    'Edit'
-  ]);
+    ['New todo', 'Edit']
+  );
 
   const todoId = useRef('');
 

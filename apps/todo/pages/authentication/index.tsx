@@ -17,7 +17,7 @@ import {
   useRegisterMutation
 } from '@monorepo-todo-app/todo-api-hooks';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { BrandGithub, BrandGoogle } from 'tabler-icons-react';
@@ -40,7 +40,10 @@ const formValidation: SchemaOf<LoginRegisterForm> = object({
 });
 
 export default function AuthenticationForm() {
-  const [type, toggle] = useToggle('login', ['login', 'register']);
+  const [type, toggle] = useToggle<'login' | 'register'>('login', [
+    'login',
+    'register'
+  ]);
 
   const {
     register,
@@ -59,7 +62,17 @@ export default function AuthenticationForm() {
   const { mutate: loginUser, isLoading: loadingLogin } =
     useLoginMutation(graphQlClient);
 
-  const { replace, query } = useRouter();
+  const router = useRouter();
+
+  const redirect = useCallback(async () => {
+    await router.replace({
+      pathname: router.query['returnUrl']
+        ? String(router.query['returnUrl'])
+        : '/app'
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container size="xs">
@@ -106,13 +119,10 @@ export default function AuthenticationForm() {
                     }
 
                     toast.success('Register completed!');
+
                     localStorage.setItem('jwt-monorepo-app', jwt);
 
-                    await replace({
-                      pathname: query['returnUrl']
-                        ? String(query['returnUrl'])
-                        : '/'
-                    });
+                    await redirect();
                   }
                 }
               );
@@ -133,11 +143,7 @@ export default function AuthenticationForm() {
                   toast.success('Login completed!');
                   localStorage.setItem('jwt-monorepo-app', jwt);
 
-                  await replace({
-                    pathname: query['returnUrl']
-                      ? String(query['returnUrl'])
-                      : '/'
-                  });
+                  await redirect();
                 }
               }
             );
