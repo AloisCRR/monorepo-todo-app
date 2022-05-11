@@ -7,3 +7,7 @@ type AuthResponse {
   jwt: String
   message: String
 }
+
+input AuthenticatedUser {
+  jwt: String!
+}

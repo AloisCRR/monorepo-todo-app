@@ -16,10 +16,6 @@ type DeleteAndUpdateResponse {
   error: String
 }
 
-input AuthenticatedUser {
-  jwt: String!
-}
-
 input NewToDo {
   title: String!
   description: String!
