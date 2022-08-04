@@ -145,7 +145,7 @@ export function AppIndex() {
                     ...data,
                     state: todoFilter
                   },
-                  user: { jwt: localStorage.getItem('jwt-monorepo-app') || '' }
+                  user: { jwt: token }
                 },
                 {
                   onSuccess: ({ addNewToDo }) => {
@@ -185,7 +185,7 @@ export function AppIndex() {
                   ...data,
                   id: todoId.current
                 },
-                user: { jwt: localStorage.getItem('jwt-monorepo-app') || '' }
+                user: { jwt: token }
               },
               {
                 onSuccess: ({ updateToDo: { error } }) => {

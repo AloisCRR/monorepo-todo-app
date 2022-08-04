@@ -16,7 +16,7 @@ async function bootstrap() {
 
   if (String(process.env['NODE_ENV']) !== 'production') {
     // @ts-expect-error Incompatible interfaces between @nestjs/platform-fastify and fastify
-    void app.register(AltairFastify, {
+    await app.register(AltairFastify, {
       path: '/altair',
       baseURL: '/altair/',
       endpointURL: '/graphql'

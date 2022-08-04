@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
+import type { FastifyRequest } from 'fastify';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { ToDoModule } from './to-do/to-do.module';
@@ -14,7 +15,9 @@ import { ToDoModule } from './to-do/to-do.module';
       ide: false,
       path: '/graphql',
       typePaths: [`${join(process.cwd(), 'graphql')}/**/*.graphql`],
-      context: ({ raw }: { raw: unknown }) => ({ raw })
+      context: (request: FastifyRequest) => ({
+        raw: request.raw
+      })
     }),
     AuthModule
   ]
